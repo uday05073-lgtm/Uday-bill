@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uday Udyam — Grain Business Ledger</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#B8863B">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Uday Udyam">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF6EE;
+    --surface:#FFFFFF;
+    --ink:#2B2419;
+    --ink-soft:#6B5D48;
+    --ink-faint:#A8977D;
+    --wheat:#B8863B;
+    --wheat-soft:#F1E3C8;
+    --olive:#4F6B3A;
+    --olive-soft:#E4EBDD;
+    --rust:#A8402C;
+    --rust-soft:#F3DFD9;
+    --line:#E4DAC5;
+    --shadow: 0 1px 2px rgba(43,36,25,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  button{ font-family:inherit; cursor:pointer; }
+  input,select{ font-family:inherit; }
+
+  .app{ display:flex; flex-direction:column; min-height:100vh; }
+  @media(min-width:900px){ .app{ flex-direction:row; } }
+
+  /* Nav (top bar on mobile, sidebar on desktop) */
+  .app-nav{
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:30;
+  }
+  @media(min-width:900px){
+    .app-nav{
+      width:220px; flex-shrink:0; height:100vh;
+      border-right:1px solid var(--line); border-bottom:none;
+      padding:24px 16px; display:flex; flex-direction:column;
+    }
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    padding:12px 14px 8px;
+  }
+  @media(min-width:900px){ .brand{ padding:0 4px; margin-bottom:28px; } }
+  .brand-mark{
+    width:32px; height:32px; border-radius:8px;
+    background: linear-gradient(155deg, var(--wheat), #8f6526);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Fraunces',serif; font-weight:700; font-size:17px;
+    flex-shrink:0;
+  }
+  .brand-text{ line-height:1.15; }
+  .brand-text .name{ font-family:'Fraunces',serif; font-weight:600; font-size:15px; }
+  .brand-text .sub{ font-size:11px; color:var(--ink-faint); }
+
+  .nav{
+    display:flex; flex-direction:row; gap:6px;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding:0 10px 12px; scrollbar-width:thin;
+  }
+  @media(min-width:900px){ .nav{ flex-direction:column; overflow-x:visible; padding:0; gap:2px; } }
+  .nav-item{
+    display:flex; align-items:center; gap:8px;
+    padding:9px 13px; border-radius:20px;
+    color:var(--ink-soft); text-decoration:none;
+    font-size:13px; font-weight:500; white-space:nowrap;
+    border:none; background:var(--bg); text-align:left; flex-shrink:0;
+    min-height:38px;
+  }
+  @media(min-width:900px){ .nav-item{ border-radius:7px; background:none; width:100%; } }
+  .nav-item:hover{ background:var(--wheat-soft); color:var(--ink); }
+  .nav-item.active{ background:var(--wheat); color:#fff; }
+  .nav-icon{ width:16px; text-align:center; flex-shrink:0; opacity:0.9; }
+
+  .sidebar-foot{ display:none; }
+  @media(min-width:900px){
+    .sidebar-foot{
+      display:block; margin-top:auto; padding-top:16px; border-top:1px solid var(--line);
+      font-size:11px; color:var(--ink-faint); line-height:1.5;
+    }
+  }
+
+  .install-btn{
+    display:none; align-items:center; justify-content:center; gap:8px;
+    width:calc(100% - 24px); margin:0 12px 10px; padding:10px 14px;
+    border-radius:8px; border:1px solid var(--wheat); background:var(--wheat-soft);
+    color:#8a6023; font-size:13px; font-weight:600; min-height:40px;
+  }
+  .install-btn.show{ display:flex; }
+  @media(min-width:900px){ .install-btn{ width:100%; margin:0 0 12px; } }
+
+  /* Main */
+  .main{ flex:1; min-width:0; padding:16px 16px 40px; }
+  @media(min-width:900px){ .main{ padding:32px 40px 60px; } }
+  .topbar{
+    display:flex; flex-direction:column; gap:6px;
+    margin-bottom:20px;
+  }
+  @media(min-width:600px){ .topbar{ flex-direction:row; justify-content:space-between; align-items:flex-start; gap:20px; } }
+  .page-title{ font-size:20px; margin:0 0 2px; }
+  @media(min-width:600px){ .page-title{ font-size:26px; margin:0 0 4px; } }
+  .page-sub{ color:var(--ink-soft); font-size:13px; margin:0; }
+  .today{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-faint);
+    text-align:left; padding-top:2px;
+  }
+  @media(min-width:600px){ .today{ text-align:right; padding-top:4px; } }
+
+  .grid{ display:grid; gap:14px; }
+  .grid-3{ grid-template-columns:repeat(3,1fr); }
+  .grid-2{ grid-template-columns:repeat(2,1fr); }
+  @media(max-width:900px){ .grid-3,.grid-2{ grid-template-columns:1fr; } }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:20px; box-shadow:var(--shadow);
+  }
+  .card h3{ font-size:14px; margin:0 0 14px; color:var(--ink); }
+
+  /* Stat cards */
+  .stat-card .stat-value{ font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:600; }
+  .stat-card .stat-label{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .stat-card.gold .stat-value{ color:var(--wheat); }
+  .stat-card.green .stat-value{ color:var(--olive); }
+  .stat-card.rust .stat-value{ color:var(--rust); }
+
+  /* Grain fill bars (signature element) */
+  .grain-row{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .grain-row:last-child{ border-bottom:none; }
+  .grain-name{ width:110px; flex-shrink:0; font-size:13px; font-weight:500; }
+  .grain-track{
+    flex:1; height:16px; border-radius:4px; background:var(--wheat-soft);
+    position:relative; overflow:hidden; border:1px solid var(--line);
+  }
+  .grain-fill{
+    height:100%; border-radius:4px;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.18) 0 2px, transparent 2px 6px),
+      linear-gradient(90deg, #C99B4E, var(--wheat));
+    transition:width 0.6s ease;
+  }
+  .grain-qty{ width:110px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft); flex-shrink:0; }
+
+  /* Forms */
+  label{ display:block; font-size:12px; font-weight:500; color:var(--ink-soft); margin-bottom:5px; }
+  .field{ margin-bottom:14px; min-width:0; }
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:7px;
+    font-size:16px; background:#FFFDF9; color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{ outline:2px solid var(--wheat); outline-offset:0; border-color:var(--wheat); }
+  .row{ display:flex; flex-wrap:wrap; gap:12px; }
+  .row > .field{ flex:1 1 150px; }
+
+  .btn{
+    padding:12px 18px; border-radius:7px; border:none; font-size:14px; font-weight:600;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    min-height:44px;
+  }
+  .btn-block{ width:100%; }
+  .btn-primary{ background:var(--wheat); color:#fff; }
+  .btn-primary:hover{ background:#a3762f; }
+  .btn-green{ background:var(--olive); color:#fff; }
+  .btn-green:hover{ background:#3f5730; }
+  .btn-ghost{ background:none; border:1px solid var(--line); color:var(--ink-soft); }
+  .btn-ghost:hover{ border-color:var(--ink-faint); color:var(--ink); }
+  .btn-sm{ padding:8px 14px; font-size:12.5px; min-height:36px; }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; }
+
+  .summary-box{
+    background:var(--bg); border:1px dashed var(--line); border-radius:8px;
+    padding:14px 16px; margin-top:6px;
+  }
+  .summary-line{ display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--ink-soft); }
+  .summary-line.total{ font-weight:600; color:var(--ink); border-top:1px solid var(--line); margin-top:6px; padding-top:8px; font-size:15px; }
+  .summary-line .val{ font-family:'IBM Plex Mono',monospace; }
+
+  /* Tables */
+  .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -4px; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; min-width:520px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-faint); font-weight:600; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  td{ padding:10px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  tr:last-child td{ border-bottom:none; }
+  td.mono, th.num{ text-align:right; }
+  .tag{ display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:600; }
+  .tag-purchase{ background:var(--wheat-soft); color:#8a6023; }
+  .tag-sale{ background:var(--olive-soft); color:#3c5230; }
+  .empty-state{ text-align:center; padding:40px 20px; color:var(--ink-faint); font-size:13.5px; }
+
+  /* Bill modal */
+  .bill-modal-overlay{
+    position:fixed; inset:0; background:rgba(43,36,25,0.55);
+    z-index:200; display:none; align-items:flex-start; justify-content:center;
+    padding:16px; overflow-y:auto;
+  }
+  .bill-modal-overlay.show{ display:flex; }
+  .bill-modal{
+    background:#fff; border-radius:12px; max-width:480px; width:100%;
+    padding:22px 22px 18px; margin:16px 0; box-shadow:0 12px 40px rgba(0,0,0,0.25);
+  }
+  .inv-head{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:16px; gap:12px; }
+  .inv-head h2{ font-family:'Fraunces',serif; font-size:19px; margin:0; }
+  .inv-meta{ text-align:right; font-size:12.5px; color:var(--ink-soft); flex-shrink:0; }
+  .inv-meta .inv-billno{ font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; color:var(--ink); }
+  .inv-row{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line); font-size:13px; gap:10px; }
+  .inv-row span:first-child{ color:var(--ink-soft); }
+  .inv-row .val{ font-family:'IBM Plex Mono',monospace; text-align:right; }
+  .inv-totals{ margin-top:12px; }
+  .inv-row.final{ font-size:16px; font-weight:600; color:var(--ink); border-top:2px solid var(--ink); border-bottom:none; padding-top:10px; margin-top:4px; }
+  .bill-modal-actions{ display:flex; gap:10px; margin-top:20px; }
+  .bill-modal-actions .btn{ flex:1; }
+
+  @media print{
+    body.printing-bill > *:not(.bill-modal-overlay){ display:none !important; }
+    body.printing-bill .bill-modal-overlay{ position:static; background:none; padding:0; display:flex; }
+    body.printing-bill .bill-modal{ box-shadow:none; max-width:none; margin:0; }
+    .no-print{ display:none !important; }
+  }
+
+  .toast{
+    position:fixed; bottom:24px; right:24px; background:var(--ink); color:#fff;
+    padding:12px 18px; border-radius:8px; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,0.2);
+    opacity:0; transform:translateY(8px); transition:all 0.25s ease; pointer-events:none; z-index:100;
+  }
+  .toast.show{ opacity:1; transform:translateY(0); }
+
+  select[multiple]{ height:auto; }
+  .hint{ font-size:11px; color:var(--ink-faint); margin-top:4px; }
+
+  .chip-add{ display:flex; gap:8px; margin-top:10px; }
+  .chip-add input{ flex:1; }
+
+  .print-only{ display:none; }
+  @media print{
+    .app-nav, .topbar{ display:none !important; }
+    .main{ padding:0; }
+    .print-only{ display:block; }
+  }
+
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:10px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+(function(){
+
+  // ---------- State ----------
+  const DEFAULT_STATE = {
+    grainTypes: ["Wheat", "Soybean", "Gram (Chana)", "Maize", "Mustard"],
+    locations: ["Godown A"],
+    batches: [],   // {id, grain, grade, location, qtyKg, createdAt}
+    bills: [],     // {id, type, billNo, date, party, grain, grade, location, bags, weightKg, rate, rateUnit, gross, labour, other, net}
+    counters: { purchase: 0, sale: 0 },
+    business: { name: "", gst: "" }
+  };
+
+  let state = null;
+  let view = "dashboard";
+  let saveTimer = null;
+
+  async function loadState(){
+    try{
+      const raw = localStorage.getItem('anaaj-khata-data');
+      state = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }catch(e){
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+    // Migrate state saved before newer fields existed
+    if(!state.business) state.business = { name: "", gst: "" };
+    if(state.business.name == null) state.business.name = "";
+    if(state.business.gst == null) state.business.gst = "";
+    render();
+  }
+
+  function saveState(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{
+      try{
+        localStorage.setItem('anaaj-khata-data', JSON.stringify(state));
+      }catch(e){ console.error('Save failed', e); showToast('Could not save — check your browser storage settings', true); }
+    }, 150);
+  }
+
+  function uid(){ return 'id' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+
+  function showToast(msg, isErr){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = isErr ? 'var(--rust)' : 'var(--ink)';
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+
+  function fmtMoney(n){
+    n = Number(n)||0;
+    return '₹' + n.toLocaleString('en-IN', {maximumFractionDigits:2, minimumFractionDigits:0});
+  }
+  function fmtKg(n){
+    n = Number(n)||0;
+    return n.toLocaleString('en-IN', {maximumFractionDigits:1}) + ' kg';
+  }
+  function fmtDate(d){
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+  }
+
+  // ---------- Inventory helpers ----------
+  function aggregateByGrain(){
+    const map = {};
+    state.grainTypes.forEach(g => map[g] = 0);
+    state.batches.forEach(b => { map[b.grain] = (map[b.grain]||0) + b.qtyKg; });
+    return map;
+  }
+  function maxStock(){
+    const vals = Object.values(aggregateByGrain());
+    return Math.max(...vals, 1);
+  }
+
+  // ---------- Actions ----------
+  function addGrainType(name){
+    name = name.trim();
+    if(!name || state.grainTypes.includes(name)) return;
+    state.grainTypes.push(name);
+    saveState(); render();
+  }
+  function addLocation(name){
+    name = name.trim();
+    if(!name || state.locations.includes(name)) return;
+    state.locations.push(name);
+    saveState(); render();
+  }
+  function addGrainTypeSilently(name){
+    if(!state.grainTypes.includes(name)) state.grainTypes.push(name);
+    saveState();
+  }
+  function addLocationSilently(name){
+    if(!state.locations.includes(name)) state.locations.push(name);
+    saveState();
+  }
+
+  function recordPurchase(data){
+    const grossWeight = data.bags * data.weightPerBag + (data.extraKg||0);
+    const netWeight = data.netWeight != null ? data.netWeight : grossWeight;
+    const gross = (netWeight/100) * data.rate;
+    const labourTotal = data.labourPerBag * data.bags;
+    const net = gross - labourTotal - data.other;
+
+    state.counters.purchase += 1;
+    const billNo = 'PB-' + String(state.counters.purchase).padStart(4,'0');
+    const bill = {
+      id: uid(), type:'purchase', billNo, date: data.date, party: data.party, partyPhone: data.partyPhone||'',
+      grain: data.grain, grade: data.grade, location: data.location,
+      bags: data.bags, weightKg: netWeight, extraKg: data.extraKg||0, rate: data.rate, rateUnit:'quintal',
+      gross, labour: labourTotal, other: data.other, net
+    };
+    state.bills.unshift(bill);
+
+    // add to inventory batch
+    state.batches.push({ id: uid(), grain: data.grain, grade: data.grade, location: data.location, qtyKg: netWeight, createdAt: data.date, fromBill: billNo });
+
+    saveState();
+    return bill;
+  }
+
+  function recordSale(data){
+    const batch = state.batches.find(b => b.id === data.batchId);
+    if(!batch) throw new Error('Batch not found');
+    if(data.weightKg > batch.qtyKg + 0.001) throw new Error('Not enough stock in this batch');
+
+    const gross = (data.weightKg/100) * data.rate;
+    const net = gross - data.other;
+
+    state.counters.sale += 1;
+    const billNo = 'SB-' + String(state.counters.sale).padStart(4,'0');
+    const bill = {
+      id: uid(), type:'sale', billNo, date: data.date, party: data.party, partyPhone: data.partyPhone||'',
+      grain: batch.grain, grade: batch.grade, location: batch.location,
+      bags: data.bags, weightKg: data.weightKg, extraKg: data.extraKg||0, rate: data.rate, rateUnit:'quintal',
+      gross, labour:0, other: data.other, net
+    };
+    state.bills.unshift(bill);
+
+    batch.qtyKg -= data.weightKg;
+    if(batch.qtyKg <= 0.001){
+      state.batches = state.batches.filter(b => b.id !== batch.id);
+    }
+
+    saveState();
+    return bill;
+  }
+
+  function deleteBill(id){
+    state.bills = state.bills.filter(b => b.id !== id);
+    saveState(); render();
+  }
+
+  // ---------- Render root ----------
+  function render(){
+    const root = document.getElementById('root');
+    root.innerHTML = `
+      <div class="app">
+        ${Sidebar()}
+        <div class="main">
+          ${Topbar()}
+          <div id="view-content"></div>
+        </div>
+      </div>
+      <div class="bill-modal-overlay" id="bill-modal-overlay">
+        <div class="bill-modal">
+          <div id="bill-modal-content"></div>
+          <div class="no-print" style="margin-top:16px; border-top:1px solid var(--line); padding-top:16px;">
+            <label>Share to phone number <span class="hint" style="display:inline">10-digit Indian number, or with country code</span></label>
+            <input type="text" id="share-phone" placeholder="e.g. 9876543210">
+            <div class="bill-modal-actions" style="margin-top:10px;">
+              <button class="btn btn-green" id="share-whatsapp">Share on WhatsApp</button>
+              <button class="btn btn-ghost" id="share-sms">Send as SMS</button>
+            </div>
+          </div>
+          <div class="bill-modal-actions no-print">
+            <button class="btn btn-primary" id="bill-modal-print">Print / Save as PDF</button>
+            <button class="btn btn-ghost" id="bill-modal-close">Close</button>
+          </div>
+        </div>
+      </div>
+      <div class="toast" id="toast"></div>
+    `;
+    document.getElementById('view-content').innerHTML = renderView();
+    attachHandlers();
+  }
+
+  function Sidebar(){
+    const items = [
+      {id:'dashboard', label:'Dashboard', icon:'◆'},
+      {id:'purchase', label:'New Purchase', icon:'↓'},
+      {id:'sale', label:'New Sale', icon:'↑'},
+      {id:'billing', label:'Billing', icon:'🧾'},
+      {id:'inventory', label:'Inventory', icon:'▤'},
+      {id:'bills', label:'All Bills', icon:'☰'},
+      {id:'settings', label:'Grain Types & Godowns', icon:'⚙'},
+    ];
+    return `
+    <nav class="app-nav">
+      <div class="brand">
+        <div class="brand-mark">उ</div>
+        <div class="brand-text">
+          <div class="name">Uday Udyam</div>
+          <div class="sub">Grain trading ledger</div>
+        </div>
+      </div>
+      <div class="nav">
+        ${items.map(it => `<button class="nav-item ${view===it.id?'active':''}" data-nav="${it.id}"><span class="nav-icon">${it.icon}</span>${it.label}</button>`).join('')}
+      </div>
+      <button class="install-btn" id="install-app-btn">⭳ Install App</button>
+      <div class="sidebar-foot">
+        Stored privately in this browser.<br>Data stays on this device.
+      </div>
+    </nav>`;
+  }
+
+  function Topbar(){
+    const titles = {
+      dashboard:['Dashboard','Stock on hand and recent activity'],
+      purchase:['New Purchase Bill','Record grain bought from a farmer'],
+      sale:['New Sale Bill','Record grain sold to a trader or buyer'],
+      billing:['Billing Window','Open, print or share any bill as a standalone invoice'],
+      inventory:['Inventory','Current stock by grain, grade and godown'],
+      bills:['All Bills','Every purchase and sale recorded'],
+      settings:['Grain Types & Godowns','Manage the lists used across the app'],
+    };
+    const [t,s] = titles[view];
+    const today = new Date().toLocaleDateString('en-IN', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+    return `
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">${t}</h1>
+        <p class="page-sub">${s}</p>
+      </div>
+      <div class="today">${today}</div>
+    </div>`;
+  }
+
+  function renderView(){
+    if(view==='dashboard') return Dashboard();
+    if(view==='purchase') return PurchaseForm();
+    if(view==='sale') return SaleForm();
+    if(view==='billing') return BillingWindow();
+    if(view==='inventory') return Inventory();
+    if(view==='bills') return BillsList();
+    if(view==='settings') return Settings();
+    return '';
+  }
+
+  // ---------- Dashboard ----------
+  function Dashboard(){
+    const agg = aggregateByGrain();
+    const max = maxStock();
+    const totalKg = Object.values(agg).reduce((a,b)=>a+b,0);
+    const totalBatches = state.batches.length;
+    const recentBills = state.bills.slice(0,6);
+
+    const purchaseTotal = state.bills.filter(b=>b.type==='purchase').reduce((s,b)=>s+b.net,0);
+    const saleTotal = state.bills.filter(b=>b.type==='sale').reduce((s,b)=>s+b.net,0);
+
+    return `
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card stat-card gold">
+        <div class="stat-value">${(totalKg/100).toLocaleString('en-IN',{maximumFractionDigits:1})} qtl</div>
+        <div class="stat-label">Total stock on hand (${totalBatches} batch${totalBatches===1?'':'es'})</div>
+      </div>
+      <div class="card stat-card green">
+        <div class="stat-value">${fmtMoney(saleTotal)}</div>
+        <div class="stat-label">Total received from sales</div>
+      </div>
+      <div class="card stat-card rust">
+        <div class="stat-value">${fmtMoney(purchaseTotal)}</div>
+        <div class="stat-label">Total paid to farmers</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Stock by grain</h3>
+        ${Object.keys(agg).length===0 || totalKg===0 ? `<div class="empty-state">No stock yet. Record a purchase to get started.</div>` :
+          Object.entries(agg).filter(([g,q])=>q>0).map(([g,q])=>`
+            <div class="grain-row">
+              <div class="grain-name">${g}</div>
+              <div class="grain-track"><div class="grain-fill" style="width:${Math.max(4,(q/max)*100)}%"></div></div>
+              <div class="grain-qty">${fmtKg(q)}</div>
+            </div>
+          `).join('')
+        }
+      </div>
+      <div class="card">
+        <h3>Recent bills</h3>
+        ${recentBills.length===0 ? `<div class="empty-state">No bills yet.</div>` : `
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>Bill</th><th>Party</th><th>Grain</th><th class="num">Net</th></tr></thead>
+          <tbody>
+            ${recentBills.map(b=>`
+              <tr>
+                <td><span class="tag ${b.type==='purchase'?'tag-purchase':'tag-sale'}">${b.billNo}</span></td>
+                <td>${b.party}</td>
+                <td>${b.grain}</td>
+                <td class="mono num">${fmtMoney(b.net)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        </div>`}
+      </div>
+    </div>`;
+  }
+
+  // ---------- Purchase Form ----------
+  function PurchaseForm(){
+    return `
+    <div class="card" style="max-width:640px;">
+      <form id="purchase-form">
+        <div class="row">
+          <div class="field">
+            <label>Farmer name</label>
+            <input type="text" name="party" required placeholder="e.g. Ramesh Patel">
+          </div>
+          <div class="field">
+            <label>Farmer phone number <span class="hint" style="display:inline">for sharing the bill</span></label>
+            <input type="text" name="partyPhone" placeholder="e.g. 9876543210">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" name="date" required value="${new Date().toISOString().slice(0,10)}">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Grain type</label>
+            <select name="grain" required data-grain-select>${state.grainTypes.map(g=>`<option value="${g}">${g}</option>`).join('')}<option value="__add_new__">+ Add new grain type…</option></select>
+          </div>
+          <div class="field">
+            <label>Grade / quality <span class="hint" style="display:inline">(optional)</span></label>
+            <input type="text" name="grade" placeholder="e.g. FAQ, Grade A">
+          </div>
+        </div>
+        <div class="field">
+          <label>Godown / storage location</label>
+          <select name="location" required data-location-select>${state.locations.map(l=>`<option value="${l}">${l}</option>`).join('')}<option value="__add_new__">+ Add new godown…</option></select>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Number of bags</label>
+            <input type="number" name="bags" min="1" step="1" required value="1">
+          </div>
+          <div class="field">
+            <label>Weight per bag (kg)</label>
+            <input type="number" name="weightPerBag" min="0" step="0.1" required value="50">
+          </div>
+          <div class="field">
+            <label>Extra loose kg <span class="hint" style="display:inline">(optional)</span></label>
+            <input type="number" name="extraKg" min="0" step="0.1" value="0" placeholder="e.g. 15">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Net weight (kg) <span class="hint" style="display:inline">auto = bags × per-bag + extra, editable</span></label>
+            <input type="number" name="netWeight" min="0" step="0.1" placeholder="auto-calculated">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Rate (₹ per quintal)</label>
+            <input type="number" name="rate" min="0" step="0.01" required>
+          </div>
+          <div class="field">
+            <label>Labour charge (₹ per bag)</label>
+            <input type="number" name="labourPerBag" min="0" step="0.01" value="0">
+          </div>
+          <div class="field">
+            <label>Other deductions (₹)</label>
+            <input type="number" name="other" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="summary-box" id="purchase-summary">
+          <div class="summary-line"><span>Gross amount</span><span class="val">₹0</span></div>
+          <div class="summary-line"><span>Less: labour</span><span class="val">₹0</span></div>
+          <div class="summary-line"><span>Less: other deductions</span><span class="val">₹0</span></div>
+          <div class="summary-line total"><span>Net payable to farmer</span><span class="val">₹0</span></div>
+        </div>
+        <div class="no-print" style="margin-top:18px;">
+          <button type="submit" class="btn btn-primary btn-block">Save purchase bill</button>
+        </div>
+      </form>
+    </div>`;
+  }
+
+  function computePurchaseSummary(form){
+    const bags = Number(form.bags.value)||0;
+    const wpb = Number(form.weightPerBag.value)||0;
+    const extraKg = Number(form.extraKg.value)||0;
+    const netOverride = form.netWeight.value ? Number(form.netWeight.value) : null;
+    const netWeight = netOverride != null ? netOverride : (bags*wpb + extraKg);
+    const rate = Number(form.rate.value)||0;
+    const labourPerBag = Number(form.labourPerBag.value)||0;
+    const other = Number(form.other.value)||0;
+    const gross = (netWeight/100)*rate;
+    const labourTotal = labourPerBag*bags;
+    const net = gross - labourTotal - other;
+    const box = document.getElementById('purchase-summary');
+    box.innerHTML = `
+      <div class="summary-line"><span>Net weight used</span><span class="val">${fmtKg(netWeight)}</span></div>
+      <div class="summary-line"><span>Gross amount</span><span class="val">${fmtMoney(gross)}</span></div>
+      <div class="summary-line"><span>Less: labour (${bags} × ₹${labourPerBag})</span><span class="val">− ${fmtMoney(labourTotal)}</span></div>
+      <div class="summary-line"><span>Less: other deductions</span><span class="val">− ${fmtMoney(other)}</span></div>
+      <div class="summary-line total"><span>Net payable to farmer</span><span class="val">${fmtMoney(net)}</span></div>
+    `;
+  }
+
+  // ---------- Sale Form ----------
+  function SaleForm(){
+    const batches = state.batches;
+    if(batches.length===0){
+      return `<div class="card"><div class="empty-state">No stock available to sell yet. Record a purchase first.</div></div>`;
+    }
+    return `
+    <div class="card" style="max-width:640px;">
+      <form id="sale-form">
+        <div class="row">
+          <div class="field">
+            <label>Buyer / trader name</label>
+            <input type="text" name="party" required placeholder="e.g. Suresh Traders">
+          </div>
+          <div class="field">
+            <label>Buyer phone number <span class="hint" style="display:inline">for sharing the bill</span></label>
+            <input type="text" name="partyPhone" placeholder="e.g. 9876543210">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" name="date" required value="${new Date().toISOString().slice(0,10)}">
+          </div>
+        </div>
+        <div class="field">
+          <label>Sell from batch</label>
+          <select name="batchId" required id="sale-batch">
+            ${batches.map(b=>`<option value="${b.id}">${b.grain}${b.grade?' · '+b.grade:''} — ${b.location} (${fmtKg(b.qtyKg)} available)</option>`).join('')}
+          </select>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Number of bags</label>
+            <input type="number" name="bags" min="1" step="1" required value="1">
+          </div>
+          <div class="field">
+            <label>Weight per bag (kg) <span class="hint" style="display:inline">optional</span></label>
+            <input type="number" name="weightPerBag" min="0" step="0.1" placeholder="e.g. 50">
+          </div>
+          <div class="field">
+            <label>Extra loose kg <span class="hint" style="display:inline">(optional)</span></label>
+            <input type="number" name="extraKg" min="0" step="0.1" value="0" placeholder="e.g. 15">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Weight sold (kg) <span class="hint" style="display:inline">auto = bags × per-bag + extra, editable</span></label>
+            <input type="number" name="weightKg" min="0.1" step="0.1" required>
+          </div>
+          <div class="field">
+            <label>Rate (₹ per quintal)</label>
+            <input type="number" name="rate" min="0" step="0.01" required>
+          </div>
+        </div>
+        <div class="field">
+          <label>Other deductions (₹)</label>
+          <input type="number" name="other" min="0" step="0.01" value="0">
+        </div>
+        <div class="summary-box" id="sale-summary">
+          <div class="summary-line"><span>Gross amount</span><span class="val">₹0</span></div>
+          <div class="summary-line"><span>Less: other deductions</span><span class="val">₹0</span></div>
+          <div class="summary-line total"><span>Net receivable</span><span class="val">₹0</span></div>
+        </div>
+        <div class="no-print" style="margin-top:18px;">
+          <button type="submit" class="btn btn-green btn-block">Save sale bill</button>
+        </div>
+      </form>
+    </div>`;
+  }
+
+  function autoFillSaleWeight(form, changedField){
+    const bags = Number(form.bags.value)||0;
+    const wpb = Number(form.weightPerBag.value)||0;
+    const extraKg = Number(form.extraKg.value)||0;
+    if(changedField === 'weightKg'){
+      form.dataset.weightTouched = 'true';
+      return;
+    }
+    if(form.dataset.weightTouched === 'true') return;
+    if(bags>0 && (wpb>0 || extraKg>0)){ form.weightKg.value = (bags*wpb + extraKg).toFixed(1); }
+  }
+
+  function computeSaleSummary(form){
+    const weightKg = Number(form.weightKg.value)||0;
+    const rate = Number(form.rate.value)||0;
+    const other = Number(form.other.value)||0;
+    const gross = (weightKg/100)*rate;
+    const net = gross - other;
+    const box = document.getElementById('sale-summary');
+    box.innerHTML = `
+      <div class="summary-line"><span>Gross amount</span><span class="val">${fmtMoney(gross)}</span></div>
+      <div class="summary-line"><span>Less: other deductions</span><span class="val">− ${fmtMoney(other)}</span></div>
+      <div class="summary-line total"><span>Net receivable</span><span class="val">${fmtMoney(net)}</span></div>
+    `;
+  }
+
+  // ---------- Inventory ----------
+  function Inventory(){
+    if(state.batches.length===0){
+      return `<div class="card"><div class="empty-state">No stock recorded yet. Purchases you record will appear here as batches.</div></div>`;
+    }
+    const sorted = [...state.batches].sort((a,b)=> a.grain.localeCompare(b.grain));
+    return `
+    <div class="card">
+      <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>Grain</th><th>Grade</th><th>Godown</th><th>Purchased on</th><th class="num">Quantity</th>
+        </tr></thead>
+        <tbody>
+          ${sorted.map(b=>`
+            <tr>
+              <td>${b.grain}</td>
+              <td>${b.grade || '—'}</td>
+              <td>${b.location}</td>
+              <td>${fmtDate(b.createdAt)}</td>
+              <td class="mono num">${fmtKg(b.qtyKg)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>`;
+  }
+
+  // ---------- Bills list ----------
+  function BillsList(){
+    if(state.bills.length===0){
+      return `<div class="card"><div class="empty-state">No bills recorded yet.</div></div>`;
+    }
+    return `
+    <div class="card">
+      <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>Bill No.</th><th>Date</th><th>Party</th><th>Grain</th><th class="num">Weight</th><th class="num">Rate/qtl</th><th class="num">Net</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${state.bills.map(b=>`
+            <tr>
+              <td><span class="tag ${b.type==='purchase'?'tag-purchase':'tag-sale'}">${b.billNo}</span></td>
+              <td>${fmtDate(b.date)}</td>
+              <td>${b.party}</td>
+              <td>${b.grain}${b.grade?' ('+b.grade+')':''}</td>
+              <td class="mono num">${fmtKg(b.weightKg)}</td>
+              <td class="mono num">${fmtMoney(b.rate)}</td>
+              <td class="mono num">${fmtMoney(b.net)}</td>
+              <td class="no-print"><button class="btn btn-ghost btn-sm" data-delete-bill="${b.id}">Delete</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>`;
+  }
+
+  // ---------- Billing window ----------
+  function BillingWindow(){
+    if(state.bills.length===0){
+      return `<div class="card"><div class="empty-state">No bills yet. Record a purchase or sale, then open it here as a printable invoice.</div></div>`;
+    }
+    return `
+    <div class="card">
+      <p class="page-sub" style="margin-top:-6px; margin-bottom:16px;">Opens the bill as a clean invoice you can print or save as PDF.</p>
+      <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>Bill No.</th><th>Date</th><th>Party</th><th>Grain</th><th class="num">Net</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${state.bills.map(b=>`
+            <tr>
+              <td><span class="tag ${b.type==='purchase'?'tag-purchase':'tag-sale'}">${b.billNo}</span></td>
+              <td>${fmtDate(b.date)}</td>
+              <td>${b.party}</td>
+              <td>${b.grain}${b.grade?' ('+b.grade+')':''}</td>
+              <td class="mono num">${fmtMoney(b.net)}</td>
+              <td class="no-print"><button class="btn btn-primary btn-sm" data-open-bill="${b.id}">Open bill</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>`;
+  }
+
+  function invoiceContentHtml(b){
+    const isPurchase = b.type === 'purchase';
+    const partyLabel = isPurchase ? 'Purchased from (Farmer) / विक्रेता (किसान)' : 'Sold to (Buyer) / खरीदार';
+    const netLabel = isPurchase ? 'Net payable / कुल देय राशि' : 'Net receivable / कुल प्राप्य राशि';
+    const bizName = (state.business.name || '').trim() || 'Your Business Name';
+    const bizGst = (state.business.gst || '').trim();
+    return `
+      <div class="inv-head">
+        <div>
+          <h2>${bizName}</h2>
+          ${bizGst ? `<div class="hint" style="margin-top:2px;">GSTIN: ${bizGst}</div>` : ''}
+          <span class="tag ${isPurchase?'tag-purchase':'tag-sale'}" style="margin-top:6px;">${isPurchase?'PURCHASE BILL / खरीद बिल':'SALE BILL / बिक्री बिल'}</span>
+        </div>
+        <div class="inv-meta">
+          <div class="inv-billno">${b.billNo}</div>
+          <div>${fmtDate(b.date)}</div>
+        </div>
+      </div>
+      <div class="inv-row"><span>${partyLabel}</span><span class="val">${b.party}</span></div>
+      ${b.partyPhone ? `<div class="inv-row"><span>Contact number / मोबाइल नंबर</span><span class="val">${b.partyPhone}</span></div>` : ''}
+      <div class="inv-row"><span>Grain / अनाज</span><span class="val">${b.grain}${b.grade?' ('+b.grade+')':''}</span></div>
+      <div class="inv-row"><span>Bags / बोरी</span><span class="val">${b.bags}</span></div>
+      <div class="inv-row"><span>Weight / वज़न</span><span class="val">${fmtKg(b.weightKg)}</span></div>
+      <div class="inv-row"><span>Rate / भाव</span><span class="val">${fmtMoney(b.rate)} / quintal</span></div>
+      ${b.extraKg ? `<div class="inv-row"><span>— extra loose / अतिरिक्त ढीला</span><span class="val">${fmtKg(b.extraKg)}</span></div>` : ''}
+      <div class="inv-totals">
+        <div class="inv-row"><span>Gross amount / कुल राशि</span><span class="val">${fmtMoney(b.gross)}</span></div>
+        ${b.labour ? `<div class="inv-row"><span>Less: labour / मजदूरी</span><span class="val">− ${fmtMoney(b.labour)}</span></div>` : ''}
+        ${b.other ? `<div class="inv-row"><span>Less: other / अन्य कटौती</span><span class="val">− ${fmtMoney(b.other)}</span></div>` : ''}
+        <div class="inv-row final"><span>${netLabel}</span><span class="val">${fmtMoney(b.net)}</span></div>
+      </div>
+    `;
+  }
+
+  let currentBillId = null;
+  function openBillModal(billId){
+    const b = state.bills.find(x=>x.id===billId);
+    if(!b) return;
+    currentBillId = billId;
+    document.getElementById('bill-modal-content').innerHTML = invoiceContentHtml(b);
+    document.getElementById('share-phone').value = b.partyPhone || '';
+    document.getElementById('bill-modal-overlay').classList.add('show');
+  }
+  function closeBillModal(){
+    document.getElementById('bill-modal-overlay').classList.remove('show');
+    currentBillId = null;
+  }
+  function printCurrentBill(){
+    document.body.classList.add('printing-bill');
+    window.print();
+  }
+  window.addEventListener('afterprint', ()=>{ document.body.classList.remove('printing-bill'); });
+
+  function normalizePhone(raw){
+    let digits = (raw||'').replace(/[^\d]/g,'');
+    digits = digits.replace(/^0+/, '');
+    if(digits.length===10) digits = '91'+digits;
+    return digits;
+  }
+
+  function billShareText(b){
+    const isPurchase = b.type === 'purchase';
+    const bizName = (state.business.name||'').trim() || 'Uday Udyam';
+    const lines = [];
+    lines.push(`*${bizName}*`);
+    lines.push(isPurchase ? `Purchase Bill / खरीद बिल — ${b.billNo}` : `Sale Bill / बिक्री बिल — ${b.billNo}`);
+    lines.push(`Date / तारीख: ${fmtDate(b.date)}`);
+    lines.push(`${isPurchase?'Farmer / किसान':'Buyer / खरीदार'}: ${b.party}`);
+    lines.push(`Grain / अनाज: ${b.grain}${b.grade?' ('+b.grade+')':''}`);
+    lines.push(`Bags / बोरी: ${b.bags}   Weight / वज़न: ${fmtKg(b.weightKg)}`);
+    lines.push(`Rate / भाव: ${fmtMoney(b.rate)} / quintal`);
+    lines.push(`${isPurchase?'Net payable / कुल देय राशि':'Net receivable / कुल प्राप्य राशि'}: ${fmtMoney(b.net)}`);
+    return lines.join('\n');
+  }
+
+  function shareCurrentBillWhatsApp(){
+    const b = state.bills.find(x=>x.id===currentBillId);
+    if(!b) return;
+    const phone = normalizePhone(document.getElementById('share-phone').value);
+    if(!phone){ showToast('Enter a phone number to share', true); return; }
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(billShareText(b))}`;
+    window.location.href = url;
+  }
+
+  function shareCurrentBillSMS(){
+    const b = state.bills.find(x=>x.id===currentBillId);
+    if(!b) return;
+    const phone = normalizePhone(document.getElementById('share-phone').value);
+    if(!phone){ showToast('Enter a phone number to share', true); return; }
+    const url = `sms:+${phone}?body=${encodeURIComponent(billShareText(b))}`;
+    window.location.href = url;
+  }
+
+  // ---------- Settings ----------
+  function Settings(){
+    return `
+    <div class="card" style="margin-bottom:14px; max-width:640px;">
+      <h3>Business details <span class="hint" style="display:inline">(shown on printed bills)</span></h3>
+      <form id="business-form">
+        <div class="row">
+          <div class="field">
+            <label>Business name</label>
+            <input type="text" name="bizName" placeholder="e.g. Sharma Grain Traders" value="${(state.business.name||'').replace(/"/g,'&quot;')}">
+          </div>
+          <div class="field">
+            <label>GST number <span class="hint" style="display:inline">(optional)</span></label>
+            <input type="text" name="bizGst" placeholder="e.g. 23AAAAA0000A1Z5" value="${(state.business.gst||'').replace(/"/g,'&quot;')}">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Save business details</button>
+      </form>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Grain types</h3>
+        ${state.grainTypes.map(g=>`<div class="grain-row" style="border:none; padding:6px 0;"><div class="grain-name" style="width:auto;">${g}</div></div>`).join('')}
+        <div class="chip-add">
+          <input type="text" id="new-grain" placeholder="Add grain type, e.g. Barley">
+          <button class="btn btn-ghost btn-sm" id="add-grain-btn">Add</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Godowns / storage locations</h3>
+        ${state.locations.map(l=>`<div class="grain-row" style="border:none; padding:6px 0;"><div class="grain-name" style="width:auto;">${l}</div></div>`).join('')}
+        <div class="chip-add">
+          <input type="text" id="new-location" placeholder="Add godown, e.g. Godown B">
+          <button class="btn btn-ghost btn-sm" id="add-location-btn">Add</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ---------- Event wiring ----------
+  function attachHandlers(){
+    document.querySelectorAll('[data-nav]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ view = btn.dataset.nav; render(); });
+    });
+
+    document.getElementById('install-app-btn').addEventListener('click', handleInstallClick);
+    updateInstallButton();
+
+    // Bill modal controls (persistent across views)
+    document.getElementById('bill-modal-print').addEventListener('click', printCurrentBill);
+    document.getElementById('bill-modal-close').addEventListener('click', closeBillModal);
+    document.getElementById('share-whatsapp').addEventListener('click', shareCurrentBillWhatsApp);
+    document.getElementById('share-sms').addEventListener('click', shareCurrentBillSMS);
+    document.getElementById('bill-modal-overlay').addEventListener('click', (e)=>{
+      if(e.target.id === 'bill-modal-overlay') closeBillModal();
+    });
+
+    if(view==='purchase'){
+      const form = document.getElementById('purchase-form');
+      form.addEventListener('input', ()=>computePurchaseSummary(form));
+      computePurchaseSummary(form);
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const fd = form;
+        const data = {
+          party: fd.party.value.trim(),
+          partyPhone: fd.partyPhone.value.trim(),
+          date: fd.date.value,
+          grain: fd.grain.value,
+          grade: fd.grade.value.trim(),
+          location: fd.location.value,
+          bags: Number(fd.bags.value)||0,
+          weightPerBag: Number(fd.weightPerBag.value)||0,
+          extraKg: Number(fd.extraKg.value)||0,
+          netWeight: fd.netWeight.value ? Number(fd.netWeight.value) : null,
+          rate: Number(fd.rate.value)||0,
+          labourPerBag: Number(fd.labourPerBag.value)||0,
+          other: Number(fd.other.value)||0,
+        };
+        if(!data.party || data.bags<=0 || data.rate<=0){ showToast('Please fill in party, bags and rate', true); return; }
+        const bill = recordPurchase(data);
+        showToast(`Saved ${bill.billNo} — ${fmtMoney(bill.net)} payable to ${bill.party}`);
+        view = 'billing'; render();
+        openBillModal(bill.id);
+      });
+    }
+
+    // Inline "+ Add new grain type / godown" handling on any select present
+    document.querySelectorAll('[data-grain-select]').forEach(sel=>{
+      sel.addEventListener('change', ()=>{
+        if(sel.value === '__add_new__'){
+          const name = prompt('Enter new grain type name:');
+          if(name && name.trim()){
+            addGrainTypeSilently(name.trim());
+            sel.innerHTML = state.grainTypes.map(g=>`<option value="${g}">${g}</option>`).join('') + `<option value="__add_new__">+ Add new grain type…</option>`;
+            sel.value = name.trim();
+          } else {
+            sel.value = state.grainTypes[0] || '';
+          }
+        }
+      });
+    });
+    document.querySelectorAll('[data-location-select]').forEach(sel=>{
+      sel.addEventListener('change', ()=>{
+        if(sel.value === '__add_new__'){
+          const name = prompt('Enter new godown / storage location name:');
+          if(name && name.trim()){
+            addLocationSilently(name.trim());
+            sel.innerHTML = state.locations.map(l=>`<option value="${l}">${l}</option>`).join('') + `<option value="__add_new__">+ Add new godown…</option>`;
+            sel.value = name.trim();
+          } else {
+            sel.value = state.locations[0] || '';
+          }
+        }
+      });
+    });
+
+    if(view==='sale'){
+      const form = document.getElementById('sale-form');
+      if(form){
+        form.addEventListener('input', (e)=>{
+          autoFillSaleWeight(form, e.target.name);
+          computeSaleSummary(form);
+        });
+        computeSaleSummary(form);
+        form.addEventListener('submit', (e)=>{
+          e.preventDefault();
+          const fd = form;
+          const data = {
+            party: fd.party.value.trim(),
+          partyPhone: fd.partyPhone.value.trim(),
+            date: fd.date.value,
+            batchId: fd.batchId.value,
+            bags: Number(fd.bags.value)||0,
+            weightKg: Number(fd.weightKg.value)||0,
+            extraKg: Number(fd.extraKg.value)||0,
+            rate: Number(fd.rate.value)||0,
+            other: Number(fd.other.value)||0,
+          };
+          if(!data.party || data.weightKg<=0 || data.rate<=0){ showToast('Please fill in party, weight and rate', true); return; }
+          try{
+            const bill = recordSale(data);
+            showToast(`Saved ${bill.billNo} — ${fmtMoney(bill.net)} receivable from ${bill.party}`);
+            view = 'billing'; render();
+            openBillModal(bill.id);
+          }catch(err){
+            showToast(err.message, true);
+          }
+        });
+      }
+    }
+
+    if(view==='settings'){
+      document.getElementById('add-grain-btn').addEventListener('click', ()=>{
+        addGrainType(document.getElementById('new-grain').value);
+      });
+      document.getElementById('add-location-btn').addEventListener('click', ()=>{
+        addLocation(document.getElementById('new-location').value);
+      });
+      document.getElementById('business-form').addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const fd = e.target;
+        state.business.name = fd.bizName.value.trim();
+        state.business.gst = fd.bizGst.value.trim();
+        saveState();
+        showToast('Business details saved');
+      });
+    }
+
+    if(view==='billing'){
+      document.querySelectorAll('[data-open-bill]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openBillModal(btn.dataset.openBill));
+      });
+    }
+
+    if(view==='bills'){
+      document.querySelectorAll('[data-delete-bill]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          if(confirm('Delete this bill? This does not restore inventory.')){
+            deleteBill(btn.dataset.deleteBill);
+          }
+        });
+      });
+    }
+  }
+
+  // ---------- PWA install ----------
+  let deferredInstallPrompt = null;
+  let installReady = false;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    installReady = true;
+    updateInstallButton();
+  });
+
+  window.addEventListener('appinstalled', ()=>{
+    deferredInstallPrompt = null;
+    installReady = false;
+    updateInstallButton();
+    showToast('App installed');
+  });
+
+  function updateInstallButton(){
+    const btn = document.getElementById('install-app-btn');
+    if(!btn) return;
+    if(isStandalone){ btn.classList.remove('show'); return; }
+    if(installReady || (isIOS)){ btn.classList.add('show'); } else { btn.classList.remove('show'); }
+  }
+
+  async function handleInstallClick(){
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      installReady = false;
+      updateInstallButton();
+      return;
+    }
+    if(isIOS){
+      showToast('Tap the Share icon, then "Add to Home Screen"');
+      return;
+    }
+    showToast('Use your browser menu to install this app');
+  }
+
+  if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+
+  loadState();
+})();
+</script>
+</body>
+</html>

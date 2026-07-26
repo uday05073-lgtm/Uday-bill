@@ -1,0 +1,25 @@
+{
+  "name": "Uday Udyam — Grain Business Ledger",
+  "short_name": "Uday Udyam",
+  "description": "Billing and inventory ledger for grain trading — purchases, sales and stock in one place.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAF6EE",
+  "theme_color": "#B8863B",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
